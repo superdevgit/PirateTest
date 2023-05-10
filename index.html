@@ -1,0 +1,84 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><link rel="icon" href="/favicon.ico"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="theme-color" content="#000000"/><meta name="description" content="Web site created using create-react-app"/><link rel="apple-touch-icon" href="/logo192.png"/><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="manifest" href="/manifest.json"/><title>PilferingPirate</title><link rel="stylesheet" href="./styles.scss"><link rel="shortcut icon" href="TemplateData/favicon.ico"><link rel="stylesheet" href="TemplateData/style.css"><script src="AgoraWebSDK/libs/databuilder.js"></script><script src="AgoraWebSDK/libs/clientmanager.js"></script><script src="AgoraWebSDK/libs/wglwrapper.js"></script><script src="AgoraWebSDK/libs/audioeffects.js"></script><script src="AgoraWebSDK/libs/eventmanager.js"></script><script src="AgoraWebSDK/libs/engineglobals.js"></script><script src="AgoraWebSDK/libs/watermark.js"></script><script src="AgoraWebSDK/libs/customvideo.js"></script><script src="AgoraWebSDK/libs/agorachannel.js"></script><script src="AgoraWebSDK/libs/multichannel.js"></script><script src="AgoraWebSDK/libs/audiosystem.js"></script><script src="AgoraWebSDK/libs/testing.js"></script><script src="AgoraWebSDK/libs/agorautils.js"></script><script src="AgoraWebSDK/libs/audiomixing.js"></script><script src="AgoraWebSDK/agorartcenginev2.js"></script><script src="AgoraWebSDK/vendor/materialize.min.js"></script><script src="AgoraRTC_N.js"></script><script src="AgoraWebSDK/vendor/jquery.min.js"></script><style>body,html{background:#101922}div#gameContainer canvas{position:absolute}div#gameContainer canvas[data-pixel-art=true]{position:absolute;image-rendering:optimizeSpeed;image-rendering:-webkit-crisp-edges;image-rendering:-moz-crisp-edges;image-rendering:-o-crisp-edges;image-rendering:crisp-edges;image-rendering:-webkit-optimize-contrast;image-rendering:optimize-contrast;image-rendering:pixelated;-ms-interpolation-mode:nearest-neighbor}#root{display:none;width:100%;height:100%;position:absolute;top:0;left:0;pointer-events:none}</style><link href="/static/css/2.8bc447d3.chunk.css" rel="stylesheet"><link href="/static/css/main.d21e50af.chunk.css" rel="stylesheet"></head><body><noscript>You need to enable JavaScript to run this app.</noscript><div id="gameContainer" class="unity-desktop" style="position:absolute"><canvas id="unity-canvas" data-pixel-art=""></canvas><div id="loading" class="loading-container"><div class="bar-container"><div class="rel-container"><div class="bar" id="bar"></div></div></div></div><div id="root"></div><div id="unity-mobile-warning">WebGL builds are not supported on mobile devices.</div></div><canvas id="inMem_Canvas" height="450" width="450" style="display:none"></canvas><canvas id="myCanvas" height="450" width="450" style="display:none"></canvas><div><div id="client-stats" class="stats"></div><div id="dragon-video-group" class="row video-group" style="height:100vh"><div class="col" style="height:100%"><p id="local-player-name" class="player-name" style="display:none"></p><div class="player-with-stats" style="height:100%"><div id="local-player" class="player" style="height:100%"></div><div id="local-stats" class="stream-stats stats"></div></div></div><div class="w-100"></div><div class="col"><div id="remote-playerlist"></div></div></div></div><script src="./DragonInterface.js"></script><script src="Build/Pirate.loader.js"></script><script>var unityInstance;
+      var mainCanvas = document.getElementById("myCanvas");
+      var mainContext = mainCanvas.getContext('2d');
+      var inMemCanvas = document.getElementById("inMem_Canvas");
+      var inMemContext = inMemCanvas.getContext('2d');
+      var canvasWidth = mainCanvas.width;
+      var canvasHeight = mainCanvas.height;
+      var angle = 0;
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Pirate.loader.js";
+      var config = {
+        dataUrl: "Build/Pirate.data",
+        frameworkUrl: "Build/Pirate.framework.js",
+        codeUrl: "Build/Pirate.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Omnislash",
+        productName: "PilferingPirate",
+        productVersion: "0.1",
+      };
+
+      var container = document.querySelector("#gameContainer");
+      var canvas = document.querySelector("#unity-canvas");
+
+      var mobileWarning = document.querySelector("#unity-mobile-warning");
+
+      var scaleToFit;
+      try {
+        scaleToFit = !!JSON.parse("");
+      } catch (e) {
+        scaleToFit = true;
+      }
+      function progressHandler(progress) {
+        canvas.style.display = "none";
+        var bar = document.getElementById('bar');
+        bar.style.width = 89.6 * progress + '%';
+      }
+      function onResize() {
+        var container = canvas.parentElement;
+        var w;
+        var h;
+
+        if (scaleToFit) {
+          w = window.innerWidth;
+          h = window.innerHeight;
+
+          var r = 1080 / 1920;
+
+          if (w * r > window.innerHeight) {
+            w = Math.min(w, Math.ceil(h / r));
+          }
+          h = Math.floor(w * r);
+        } else {
+          w = 1920;
+          h = 1080;
+        }
+
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+          container.className = "unity-mobile";
+          config.devicePixelRatio = 1;
+          mobileWarning.style.display = "block";
+          setTimeout(() => {
+            mobileWarning.style.display = "none";
+          }, 5000);
+        } else {
+          container.style.width = canvas.style.width = w + "px";
+          container.style.height = canvas.style.height = h + "px";
+          container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+          container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+        }
+      }
+
+      createUnityInstance(canvas, config, progressHandler).then(function (instance) {
+        unityInstance = instance;
+        var loading = document.getElementById('loading');
+        canvas.style.display = 'block';
+        loading.style.display = 'none';
+        canvas = instance.Module.canvas;
+        onResize();
+
+        window.dragon.checkWalletConnect();
+      })
+      window.addEventListener('resize', onResize);
+      onResize();</script><script>!function(e){function r(r){for(var n,p,l=r[0],a=r[1],f=r[2],c=0,s=[];c<l.length;c++)p=l[c],Object.prototype.hasOwnProperty.call(o,p)&&o[p]&&s.push(o[p][0]),o[p]=0;for(n in a)Object.prototype.hasOwnProperty.call(a,n)&&(e[n]=a[n]);for(i&&i(r);s.length;)s.shift()();return u.push.apply(u,f||[]),t()}function t(){for(var e,r=0;r<u.length;r++){for(var t=u[r],n=!0,l=1;l<t.length;l++){var a=t[l];0!==o[a]&&(n=!1)}n&&(u.splice(r--,1),e=p(p.s=t[0]))}return e}var n={},o={1:0},u=[];function p(r){if(n[r])return n[r].exports;var t=n[r]={i:r,l:!1,exports:{}};return e[r].call(t.exports,t,t.exports,p),t.l=!0,t.exports}p.m=e,p.c=n,p.d=function(e,r,t){p.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:t})},p.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},p.t=function(e,r){if(1&r&&(e=p(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var t=Object.create(null);if(p.r(t),Object.defineProperty(t,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var n in e)p.d(t,n,function(r){return e[r]}.bind(null,n));return t},p.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return p.d(r,"a",r),r},p.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},p.p="/";var l=this.webpackJsonpapp=this.webpackJsonpapp||[],a=l.push.bind(l);l.push=r,l=l.slice();for(var f=0;f<l.length;f++)r(l[f]);var i=a;t()}([])</script><script src="/static/js/2.a24cfda4.chunk.js"></script><script src="/static/js/main.045de5c5.chunk.js"></script></body></html>
